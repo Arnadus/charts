@@ -5,7 +5,7 @@ metadata:
   name: {{ template "fullname" . }}-server
   labels:
     release: "{{ .Release.Name }}"
-    app: "redis-ha"
+    app: "{{ template "name" . }}"
     name: "redis-server"
     redis-node: "true"
 {{ include "labels.standard" . | indent 4 }}
@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        app: "redis-ha"
+        app: "{{ template "name" . }}"
         name: "redis-server"
         redis-node: "true"
 {{ include "labels.standard" . | indent 8 }}
@@ -22,9 +22,9 @@ spec:
 	  {{- if .Values.rbac.create }}
       serviceAccountName: {{ template "fullname" . }}
       {{- end }}
-      {{- if .Values.nodeSelector }}
-      nodeSelector:
-{{ toYaml .Values.nodeSelector | indent 8 }}
+      {{- if .Values.servers.affinity }}
+      affinity:
+{{ toYaml .Values.servers.affinity | indent 8 }}
       {{- end }}
       {{- if .Values.tolerations }}
       tolerations:
@@ -40,6 +40,10 @@ spec:
             value: "redis-sentinel"
           - name: REDIS_CHART_PREFIX
             value: {{ template "fullname" . }}-
+{{- if .Values.auth }}
+          - name: REDIS_PASS
+            value: {{ .Values.redisPassword }}
+{{- end }}
         ports:
           - containerPort: 6379
         volumeMounts:
@@ -47,4 +51,15 @@ spec:
             name: data
       volumes:
       - name: data
-
+      {{- if .Values.servers.persistence.enabled }}
+      {{- if .Values.servers.persistence.hostpath }}
+        hostPath:
+          path: {{ .Values.servers.persistence.hostpath }}/{{ include "fullname" . }}
+          type: {{ .Values.servers.persistence.hostpathType }}
+      {{- else if .Values.servers.persistence.existingClaim }}
+        persistentVolumeClaim:
+          claimName: {{ .Values.servers.persistence.existingClaim }}
+      {{- else }}
+        emptyDir: {}
+      {{- end }}
+      {{- end }}

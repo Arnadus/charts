@@ -7,11 +7,19 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     type: openvpn
 spec:
+#  ports:
+#    - name: openvpn
+#      port: {{ .Values.service.externalPort }}
+#      targetPort: {{ .Values.service.internalPort }}
+#      protocol: {{ .Values.openvpn.OVPN_PROTO | upper }}
+
+  type: NodePort
   ports:
-    - name: openvpn
-      port: {{ .Values.service.externalPort }}
-      targetPort: {{ .Values.service.internalPort }}
+    - port: {{ .Values.service.internalPort }}
+      nodePort: {{ .Values.service.externalPort }}
       protocol: {{ .Values.openvpn.OVPN_PROTO | upper }}
+      name: "openvpn"
+
   selector:
     app: {{ template "openvpn.fullname" . }}
   type: {{ .Values.service.type }}

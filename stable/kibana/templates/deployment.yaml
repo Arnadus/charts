@@ -24,10 +24,7 @@ spec:
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
-        {{- range $key, $value := .Values.env }}
-        - name: "{{ $key }}"
-          value: "{{ $value }}"
-        {{- end }}
+{{ include .Values.env.templateName . | indent 8 }}
         ports:
         - containerPort: {{ .Values.service.internalPort }}
           name: {{ template "kibana.name" . }}

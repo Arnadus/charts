@@ -15,18 +15,16 @@ metadata:
       {{ $key }}: {{ $value | quote }}
     {{- end }}
 spec:
-  rules:
-    {{- range $host := .Values.ingress.hosts }}
-    - host: {{ $host }}
-      http:
-        paths:
-          - path: /
-            backend:
-              serviceName: {{ $serviceName }}
-              servicePort: {{ $servicePort }}
-    {{- end -}}
-  {{- if .Values.ingress.tls }}
   tls:
-{{ toYaml .Values.ingress.tls | indent 4 }}
-  {{- end -}}
+  - hosts:
+    - {{ .Release.Name }}-kibana.{{ .Values.ingress.domainName }}
+  rules:
+  - host: {{ .Release.Name }}-kibana.{{ .Values.ingress.domainName }}
+    http:
+      paths:
+        - path:
+          backend:
+            serviceName: {{ template "kibana.fullname" . }}
+            servicePort: {{ .Values.service.externalPort }}
+
 {{- end -}}

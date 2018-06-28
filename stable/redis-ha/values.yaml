@@ -22,14 +22,28 @@ nodeSelector: {}
 tolerations: []
 
 ## Redis image version
-redis_image: quay.io/smile/redis:4.0.6r2
+redis_image: quay.io/smile/redis:master
 ## replicas number for each component
 replicas:
   servers: 3
   sentinels: 3
 servers:
+  affinity:
+  persistence:
+    enabled: false
+    hostpath: /var/lib/redis
+    hostpathType: DirectoryOrCreate
   serviceType: ClusterIP  # [ClusterIP|LoadBalancer]
   annotations: {}
 
 rbac:
   create: false
+
+## Configures redis with AUTH (requirepass & masterauth conf params)
+auth: false
+
+## Redis password
+## Defaults to a random 10-character alphanumeric string if not set and auth is true
+## ref: https://github.com/kubernetes/charts/blob/master/stable/redis-ha/templates/redis-auth-secret.yaml
+##
+redisPassword:

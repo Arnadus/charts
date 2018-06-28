@@ -98,11 +98,18 @@ spec:
       volumes:
       - name: data
       {{- if .Values.persistence.enabled }}
+      {{- if .Values.persistence.hostpath }}
+        hostPath:
+          path: {{ .Values.persistence.hostpath }}
+          type: {{ .Values.persistence.hostpathType }}
+      {{- else if .Values.persistence.enabled }}
         persistentVolumeClaim:
           claimName: {{ .Values.persistence.existingClaim | default (include "postgresql.fullname" .) }}
       {{- else }}
         emptyDir: {}
       {{- end }}
+      {{- end }}
+
       {{- if and .Values.metrics.enabled .Values.metrics.customMetrics }}
       - name: custom-metrics
         secret:

@@ -23,8 +23,18 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ template "elasticsearch.fullname" . }}
-      {{- if eq .Values.master.antiAffinity "hard" }}
+      tolerations:
+{{ toYaml .Values.master.tolerations | indent 6 }}
       affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "es-master"
+                operator: In
+                values:
+                - "true"
+      {{- if eq .Values.master.antiAffinity "hard" }}
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - topologyKey: "kubernetes.io/hostname"
@@ -34,7 +44,6 @@ spec:
                   release: "{{ .Release.Name }}"
                   component: "{{ .Values.master.name }}"
       {{- else if eq .Values.master.antiAffinity "soft" }}
-      affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
@@ -134,6 +143,11 @@ spec:
   {{- if not .Values.master.persistence.enabled }}
       - name: data
         emptyDir: {}
+  {{- else if .Values.master.persistence.hostpath }}
+      - name: data
+        hostPath:
+          path: {{ .Values.master.persistence.hostpath }}
+          type: {{ .Values.master.persistence.hostpathType }}
   {{- else }}
   volumeClaimTemplates:
   - metadata:

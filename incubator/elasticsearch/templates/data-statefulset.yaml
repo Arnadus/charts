@@ -23,8 +23,18 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ template "elasticsearch.fullname" . }}
-      {{- if eq .Values.data.antiAffinity "hard" }}
+      tolerations:
+{{ toYaml .Values.data.tolerations | indent 6 }}
       affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "es-data"
+                operator: In
+                values:
+                - "true"
+      {{- if eq .Values.data.antiAffinity "hard" }}
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - topologyKey: "kubernetes.io/hostname"
@@ -34,7 +44,6 @@ spec:
                   release: "{{ .Release.Name }}"
                   component: "{{ .Values.data.name }}"
       {{- else if eq .Values.data.antiAffinity "soft" }}
-      affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1
@@ -138,6 +147,11 @@ spec:
   {{- if not .Values.data.persistence.enabled }}
       - name: data
         emptyDir: {}
+  {{- else if .Values.data.persistence.hostpath }}
+      - name: data
+        hostPath:
+          path: {{ .Values.data.persistence.hostpath }}
+          type: {{ .Values.data.persistence.hostpathType }}
   {{- else }}
   volumeClaimTemplates:
   - metadata:
@@ -146,11 +160,13 @@ spec:
       accessModes:
         - {{ .Values.data.persistence.accessMode | quote }}
     {{- if .Values.data.persistence.storageClass }}
+
     {{- if (eq "-" .Values.data.persistence.storageClass) }}
       storageClassName: ""
     {{- else }}
       storageClassName: "{{ .Values.data.persistence.storageClass }}"
     {{- end }}
+
     {{- end }}
       resources:
         requests:

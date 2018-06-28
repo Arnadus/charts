@@ -35,6 +35,8 @@ persistence:
   # storageClass: "-"
   accessMode: ReadWriteOnce
   size: 2M
+
+affinity:
 openvpn:
   # Network allocated for openvpn clients (default: 10.240.0.0).
   OVPN_NETWORK: 10.240.0.0

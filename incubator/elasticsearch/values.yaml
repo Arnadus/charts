@@ -21,6 +21,7 @@ client:
   name: client
   replicas: 2
   serviceType: ClusterIP
+  tolerations:
 
 ## (dict) If specified, apply these annotations to the client service
 #  serviceAnnotations:
@@ -45,11 +46,14 @@ master:
   exposeHttp: false
   replicas: 3
   heapSize: "512m"
+  tolerations:
   persistence:
     enabled: true
     accessMode: ReadWriteOnce
     name: data
     size: "4Gi"
+    hostpath: false
+    hostpathType: DirectoryOrCreate
     # storageClass: "ssd"
   antiAffinity: "soft"
   resources:
@@ -69,11 +73,14 @@ data:
   exposeHttp: false
   replicas: 2
   heapSize: "1536m"
+  tolerations:
   persistence:
     enabled: true
     accessMode: ReadWriteOnce
     name: data
     size: "30Gi"
+    hostpath: false
+    hostpathType: DirectoryOrCreate
     # storageClass: "ssd"
   terminationGracePeriodSeconds: 3600
   antiAffinity: "soft"

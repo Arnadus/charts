@@ -7,7 +7,7 @@ spec:
   template:
     metadata:
       labels:
-        app: "redis-ha"
+        app: "{{ template "name" . }}"
         name: {{ template "fullname" . }}-sentinel
 {{ include "labels.standard" . | indent 8 }}
     spec:

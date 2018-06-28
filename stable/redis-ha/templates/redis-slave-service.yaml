@@ -10,7 +10,7 @@ spec:
     protocol: TCP
     targetPort: 6379
   selector:
-    app: "redis-ha"
+    app: "{{ template "name" . }}"
     redis-node: "true"
     redis-role: "slave"
     release: "{{ .Release.Name }}"

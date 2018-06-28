@@ -31,7 +31,6 @@ data:
       client
       nobind
       dev tun
-      redirect-gateway def1
       <key>
       `cat ${EASY_RSA_LOC}/pki/private/$1.key`
       </key>

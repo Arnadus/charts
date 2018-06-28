@@ -22,8 +22,18 @@ spec:
         {{- end }}
     spec:
       serviceAccountName: {{ template "elasticsearch.fullname" . }}
-      {{- if eq .Values.client.antiAffinity "hard" }}
+      tolerations:
+{{ toYaml .Values.client.tolerations | indent 6 }}
       affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: "es-client"
+                operator: In
+                values:
+                - "true"
+      {{- if eq .Values.client.antiAffinity "hard" }}
         podAntiAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             - topologyKey: "kubernetes.io/hostname"
@@ -33,7 +43,6 @@ spec:
                   release: "{{ .Release.Name }}"
                   component: "{{ .Values.client.name }}"
       {{- else if eq .Values.client.antiAffinity "soft" }}
-      affinity:
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
           - weight: 1

@@ -22,7 +22,16 @@ nodeSelector: {}
 tolerations: []
 
 ## Redis image version
-redis_image: quay.io/smile/redis:master
+imagePullSecrets:
+  - name: altissia
+
+image:
+  repository: docker.altissia.com
+  name: speaky-redis-core
+  tag: latest
+  pullPolicy: Always
+
+#redis_image: quay.io/smile/redis:master
 ## replicas number for each component
 replicas:
   servers: 3
@@ -35,7 +44,8 @@ servers:
     hostpathType: DirectoryOrCreate
   serviceType: ClusterIP  # [ClusterIP|LoadBalancer]
   annotations: {}
-
+sentinels:
+  affinity:
 rbac:
   create: false
 

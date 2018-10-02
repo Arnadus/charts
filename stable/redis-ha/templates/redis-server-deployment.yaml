@@ -29,10 +29,14 @@ spec:
       {{- if .Values.tolerations }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
+
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 6 }}
+
       {{- end }}
       containers:
       - name: redis
-        image: {{ .Values.redis_image }}
+        image: {{ include "redis-ha.imageFullName" . }}
         resources:
 {{ toYaml .Values.resources.server | indent 10 }}
         env:
@@ -49,6 +53,15 @@ spec:
         volumeMounts:
           - mountPath: /redis-master-data 
             name: data
+        securityContext:
+          privileged: true
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - sysctl -w net.core.somaxconn=65535
       volumes:
       - name: data
       {{- if .Values.servers.persistence.enabled }}

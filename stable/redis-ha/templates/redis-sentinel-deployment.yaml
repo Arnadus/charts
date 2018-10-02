@@ -19,12 +19,18 @@ spec:
 {{ toYaml .Values.nodeSelector | indent 8 }}
       {{- end }}
       {{- if .Values.tolerations }}
+      affinity:
+{{ toYaml .Values.sentinels.affinity | indent 8 }}
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
       {{- end }}
+
+      imagePullSecrets:
+{{ toYaml .Values.imagePullSecrets | indent 6 }}
+
       containers:
       - name: sentinel
-        image: {{ .Values.redis_image }}
+        image: {{ include "redis-ha.imageFullName" . }}
         resources:
 {{ toYaml .Values.resources.sentinel | indent 10 }}
         env:

@@ -43,3 +43,11 @@ Example output:
 {{- define "chartref" -}}
   {{- replace "+" "_" .Chart.Version | printf "%s-%s" .Chart.Name -}}
 {{- end -}}
+
+{{- define "redis-ha.imageFullName" -}}
+{{- if .Values.overrideImageFullName -}}
+{{- printf "%s" .Values.overrideImageFullName -}}
+{{- else -}}
+{{- printf "%s/%s:%s" .Values.image.repository .Values.image.name .Values.image.tag -}}
+{{- end -}}
+{{- end -}}
